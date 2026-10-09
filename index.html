@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boutique WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+/* Concept : étal de marché lisible d'un coup d'œil. Tuiles à motif, prix en FCFA, une barre de commande fixe en bas. */
+:root{
+  --bg:#F5F6F2; --surface:#FFFFFF; --fg:#16201B; --muted:#58665D; --line:#DCE1D9;
+  --accent:#0B6B4F; --accent-fg:#FFFFFF; --tag:#F2B01E; --tag-fg:#2A1F00; --soft:#E9EEE6;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#101612; --surface:#18211B; --fg:#EAF0EA; --muted:#9DAEA2; --line:#2A362E;
+    --accent:#3DC48F; --accent-fg:#06281C; --soft:#1F2B23; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101612; --surface:#18211B; --fg:#EAF0EA; --muted:#9DAEA2; --line:#2A362E;
+  --accent:#3DC48F; --accent-fg:#06281C; --soft:#1F2B23; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:0 120px}
+.page{max-width:720px;margin-inline:auto}
+.demo{margin-inline:-16px;padding:8px 16px;background:var(--tag);color:var(--tag-fg);font-size:13px;font-weight:600;text-align:center}
+header{padding-block:24px 8px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,8vw,44px);line-height:1.05;margin:0 0 8px;text-wrap:balance;letter-spacing:-.02em}
+.slogan{margin:0;color:var(--muted);max-width:46ch}
+.infos{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;padding:0;list-style:none}
+.infos li{font-size:13px;background:var(--soft);border-radius:999px;padding:4px 12px}
+.filtres{display:flex;gap:8px;overflow-x:auto;padding-block:16px 8px;scrollbar-width:none}
+.filtres button{flex:none;font:inherit;font-size:14px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 14px;cursor:pointer}
+.filtres button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-block:8px}
+.carte{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.tuile{aspect-ratio:4/3;max-width:100%;display:grid;place-items:end start;padding:8px 12px;color:#fff;
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.17) 0 9px,transparent 9px 18px),hsl(var(--h) 52% 40%)}
+.tuile span{font-family:var(--display);font-weight:700;font-size:44px;line-height:1}
+.corps{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+h3{font-family:var(--display);font-size:17px;line-height:1.15;margin:0;font-weight:600}
+.desc{margin:0;color:var(--muted);font-size:13px}
+.bas{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.prix{font-weight:600;font-variant-numeric:tabular-nums}
+.ctrl button,.qte button{font:inherit;cursor:pointer}
+.ajout{width:100%;border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:600;border-radius:8px;padding:8px}
+.ajout:hover{background:var(--soft)}
+.qte{display:flex;align-items:center;justify-content:space-between;background:var(--accent);color:var(--accent-fg);border-radius:8px}
+.qte button{border:0;background:transparent;color:inherit;width:44px;height:38px;font-size:20px;font-weight:600}
+.qte output{font-weight:600;font-variant-numeric:tabular-nums}
+.commande{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+h2{font-family:var(--display);font-size:22px;margin:0 0 12px}
+.lignes{list-style:none;margin:0 0 12px;padding:0}
+.lignes li{display:flex;justify-content:space-between;gap:12px;padding-block:6px;border-bottom:1px dashed var(--line)}
+.lignes .vide{color:var(--muted);border:0}
+.lignes span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
+label{display:block;font-size:13px;font-weight:600;margin-block:12px 4px}
+input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+footer{padding-block:24px;color:var(--muted);font-size:13px}
+.barre{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+.barre .in{max-width:720px;margin-inline:auto;display:flex;align-items:center;gap:12px}
+.total{flex:none;line-height:1.15}
+.total small{display:block;color:var(--muted);font-size:12px}
+.total strong{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums}
+#cta{flex:1;min-width:0;text-align:center;text-decoration:none;background:var(--accent);color:var(--accent-fg);font-weight:600;border-radius:10px;padding:14px 12px}
+#cta[aria-disabled="true"]{background:var(--soft);color:var(--muted);cursor:not-allowed}
+@media (prefers-reduced-motion:no-preference){.ajout,.qte,#cta{transition:background .15s}}
+[hidden]{display:none!important}
+body{margin:0}
+:root{color-scheme:light}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="demo" id="demo" hidden></div>
+  <header>
+    <h1 id="nom"></h1>
+    <p class="slogan" id="slogan"></p>
+    <ul class="infos" id="infos"></ul>
+  </header>
+  <div class="filtres" id="filtres" role="group" aria-label="Catégories"></div>
+  <main class="grille" id="grille"></main>
+
+  <section class="commande" aria-labelledby="t-cmd">
+    <h2 id="t-cmd">Ma commande</h2>
+    <ul class="lignes" id="lignes"></ul>
+    <label for="client">Ton nom</label>
+    <input id="client" autocomplete="name" placeholder="Prénom Nom">
+    <label for="adresse">Quartier ou lieu de livraison</label>
+    <input id="adresse" autocomplete="street-address" placeholder="Ex. Akpakpa, Cotonou">
+  </section>
+  <footer>Commandes reçues sur WhatsApp : <span id="numero"></span></footer>
+</div>
+
+<div class="barre">
+  <div class="in">
+    <div class="total"><small>Total</small><strong id="total">0 FCFA</strong></div>
+    <a id="cta" target="_blank" rel="noopener" aria-disabled="true">Choisis un produit</a>
+  </div>
+</div>
+
+<script>
+/* À personnaliser : numéro (indicatif du pays sans le +, ex. 229 pour le Bénin), nom, produits. */
+const CONFIG = {
+  boutique: "Poulet Local Amélioré",
+  slogan: "Poulet local amélioré, frais ou vivant. Choisis, valide, et la commande part sur WhatsApp.",
+  whatsapp: "22943220779",
+  devise: "FCFA",
+  avertissement: "Prix d'exemple, à remplacer par tes tarifs réels.",
+  infos: ["Poulet local amélioré", "Frais ou vivant", "Commande par WhatsApp"],
+  produits: [
+    {id:"entier", nom:"Poulet entier frais", desc:"Vidé, prêt à cuire", prix:5000, cat:"Poulet", h:30},
+    {id:"vivant", nom:"Poulet vivant", desc:"Choisi sur place", prix:4500, cat:"Poulet", h:95}
+  ]
+};
+
+const $ = s => document.querySelector(s);
+const fmt = n => new Intl.NumberFormat("fr-FR").format(n) + " " + CONFIG.devise;
+const cart = {};
+let filtre = "Tout";
+
+$("#nom").textContent = CONFIG.boutique;
+$("#slogan").textContent = CONFIG.slogan;
+$("#infos").innerHTML = CONFIG.infos.map(t => "<li>" + t + "</li>").join("");
+$("#numero").textContent = "+" + CONFIG.whatsapp;
+if (CONFIG.avertissement) { $("#demo").textContent = CONFIG.avertissement; $("#demo").hidden = false; }
+
+const cats = ["Tout", ...new Set(CONFIG.produits.map(p => p.cat))];
+if (cats.length > 2) {
+  $("#filtres").innerHTML = cats.map(c => '<button type="button" aria-pressed="' + (c === filtre) + '">' + c + "</button>").join("");
+} else {
+  $("#filtres").hidden = true;
+}
+
+$("#grille").innerHTML = CONFIG.produits.map(p =>
+  '<article class="carte" data-id="' + p.id + '" data-cat="' + p.cat + '">' +
+    '<div class="tuile" style="--h:' + p.h + '" aria-hidden="true"><span>' + p.nom.charAt(0) + "</span></div>" +
+    '<div class="corps"><h3>' + p.nom + '</h3><p class="desc">' + p.desc + "</p>" +
+    '<div class="bas"><span class="prix">' + fmt(p.prix) + "</span>" +
+    '<div class="ctrl"><button type="button" class="ajout" data-act="plus">Ajouter</button>' +
+    '<div class="qte" hidden><button type="button" data-act="moins" aria-label="Retirer : ' + p.nom + '">−</button>' +
+    "<output>0</output>" +
+    '<button type="button" data-act="plus" aria-label="Ajouter : ' + p.nom + '">+</button></div></div></div></div></article>'
+).join("");
+
+$("#grille").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  const id = b.closest(".carte").dataset.id;
+  cart[id] = Math.max(0, (cart[id] || 0) + (b.dataset.act === "moins" ? -1 : 1));
+  update();
+});
+
+$("#filtres").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  filtre = b.textContent;
+  document.querySelectorAll("#filtres button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  document.querySelectorAll(".carte").forEach(c => { c.hidden = filtre !== "Tout" && c.dataset.cat !== filtre; });
+});
+
+["client", "adresse"].forEach(id => $("#" + id).addEventListener("input", update));
+
+$("#cta").addEventListener("click", e => {
+  if ($("#cta").getAttribute("aria-disabled") === "true") e.preventDefault();
+});
+
+function update() {
+  let total = 0;
+  const lignes = [];
+  CONFIG.produits.forEach(p => {
+    const q = cart[p.id] || 0;
+    const carte = document.querySelector('.carte[data-id="' + p.id + '"]');
+    carte.querySelector(".ajout").hidden = q > 0;
+    carte.querySelector(".qte").hidden = q === 0;
+    carte.querySelector("output").textContent = q;
+    if (q > 0) { total += q * p.prix; lignes.push({p, q}); }
+  });
+
+  $("#lignes").innerHTML = lignes.length
+    ? lignes.map(l => "<li><span>" + l.q + " × " + l.p.nom + "</span><span>" + fmt(l.q * l.p.prix) + "</span></li>").join("")
+    : '<li class="vide">Aucun produit pour l\'instant.</li>';
+  $("#total").textContent = fmt(total);
+
+  const cta = $("#cta");
+  if (!lignes.length) {
+    cta.setAttribute("aria-disabled", "true");
+    cta.removeAttribute("href");
+    cta.textContent = "Choisis un produit";
+    return;
+  }
+  const nom = $("#client").value.trim();
+  const adr = $("#adresse").value.trim();
+  const texte = "Bonjour " + CONFIG.boutique + ", je voudrais commander :\n" +
+    lignes.map(l => "• " + l.q + " × " + l.p.nom + " : " + fmt(l.q * l.p.prix)).join("\n") +
+    "\n\nTotal : " + fmt(total) +
+    (nom ? "\nNom : " + nom : "") + (adr ? "\nLivraison : " + adr : "");
+  cta.setAttribute("aria-disabled", "false");
+  cta.href = "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(texte);
+  cta.textContent = "Commander sur WhatsApp";
+}
+update();
+</script>
+
+</body>
+</html>
